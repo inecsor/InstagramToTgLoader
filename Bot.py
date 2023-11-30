@@ -8,11 +8,6 @@ from telegram.ext import Application
 
 nest_asyncio.apply()
 
-# Directory where stories are saved
-# prod_chat
-# CHANNEL_CHAT_ID = '-1002015200943'
-# test_group
-
 
 STORIES_DIR = os.path.join(os.path.dirname(__file__), 'InstaStoryLoader/stories/'+Credentials.STORIES_PROVIDER_USERNAME)
 SENT_STORIES_FILE = 'sent_stories.txt'  # File to keep track of sent stories
