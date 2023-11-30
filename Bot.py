@@ -70,6 +70,16 @@ async def send_new_stories(context):
 
     write_sent_stories(sent_stories)
 
+async def remove_credentials_periodically():
+    credentials_file_path = os.path.join(os.path.dirname(__file__), 'InstaStoryLoader/credentials.json')
+    while True:
+        if os.path.exists(credentials_file_path):
+            os.remove(credentials_file_path)
+            print('[I] Credentials file removed.')
+        else:
+            print('[I] No credentials file found to remove.')
+
+        await asyncio.sleep(14400)  # 4 hours in seconds
 
 async def periodic_task(context):
     last_cleanup = datetime.now()
@@ -94,6 +104,7 @@ async def main():
         os.remove(feed_file_path)
     application = Application.builder().token(Credentials.BOT_KEY).build()
     asyncio.create_task(periodic_task(application))
+    asyncio.create_task(remove_credentials_periodically())
     await application.run_polling()
 
 
