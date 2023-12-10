@@ -1,15 +1,17 @@
-import asyncio
 import os
+import time
+import asyncio
 import subprocess
-import nest_asyncio
 import Credentials
-from datetime import datetime, timedelta
+import nest_asyncio
+
 from telegram.ext import Application
+from datetime import datetime, timedelta
 
 nest_asyncio.apply()
 
-
-STORIES_DIR = os.path.join(os.path.dirname(__file__), 'InstaStoryLoader/stories/'+Credentials.STORIES_PROVIDER_USERNAME)
+STORIES_DIR = os.path.join(os.path.dirname(__file__),
+                           'InstaStoryLoader/stories/' + Credentials.STORIES_PROVIDER_USERNAME)
 SENT_STORIES_FILE = 'sent_stories.txt'  # File to keep track of sent stories
 
 
@@ -35,10 +37,25 @@ def write_sent_stories(sent_stories):
 
 
 def clean_stories_folder():
+    current_time = time.time()
+    two_days = 2 * 24 * 60 * 60
+
+    with open(SENT_STORIES_FILE, 'r') as file:
+        sent_stories = file.read().splitlines()
+
     for filename in os.listdir(STORIES_DIR):
         file_path = os.path.join(STORIES_DIR, filename)
-        os.remove(file_path)
-    open(SENT_STORIES_FILE, 'w').close()
+
+        modification_time = os.path.getmtime(file_path)
+
+        if current_time - modification_time > two_days:
+            os.remove(file_path)
+            if filename in sent_stories:
+                sent_stories.remove(filename)
+
+    with open(SENT_STORIES_FILE, 'w') as file:
+        for story in sent_stories:
+            file.write(story + '\n')
 
 
 async def download_stories():
@@ -70,6 +87,7 @@ async def send_new_stories(context):
 
     write_sent_stories(sent_stories)
 
+
 async def remove_credentials_periodically():
     credentials_file_path = os.path.join(os.path.dirname(__file__), 'InstaStoryLoader/credentials.json')
     while True:
@@ -79,7 +97,8 @@ async def remove_credentials_periodically():
         else:
             print('[I] No credentials file found to remove.')
 
-        await asyncio.sleep(14400)  # 4 hours in seconds
+        await asyncio.sleep(14400)
+
 
 async def periodic_task(context):
     last_cleanup = datetime.now()
@@ -87,12 +106,11 @@ async def periodic_task(context):
         await download_stories()
         await send_new_stories(context)
 
-        # Check if a day has passed to clean up the folder
-        if datetime.now() - last_cleanup >= timedelta(days=1):
+        if datetime.now() - last_cleanup >= timedelta(days=2):
             clean_stories_folder()
             last_cleanup = datetime.now()
 
-        await asyncio.sleep(3600)  # Wait for 1 hour
+        await asyncio.sleep(1800)
 
 
 async def main():
