@@ -60,7 +60,7 @@ def clean_stories_folder():
 
 
 async def download_stories():
-    random_username = [Credentials.INSTAGRAM_USERNAME, Credentials.INSTAGRAM_USERNAME1][random.randint(1,2)]
+    random_username = [Credentials.INSTAGRAM_USERNAME, Credentials.INSTAGRAM_USERNAME1][random.randint(0,1)]
     command = ['python3', 'InstaStoryLoader/StoryLoader.py', '-u',
                random_username, '-p', Credentials.INSTAGRAM_PASSWORD, '-d',
                Credentials.STORIES_PROVIDER_USERNAME, '--no-thumbs', '--taken-at']
