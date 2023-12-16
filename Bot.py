@@ -1,4 +1,5 @@
 import os
+import random
 import time
 import asyncio
 import subprocess
@@ -38,7 +39,7 @@ def write_sent_stories(sent_stories):
 
 def clean_stories_folder():
     current_time = time.time()
-    two_days = 2 * 24 * 60 * 60
+    two_days = 172800
 
     with open(SENT_STORIES_FILE, 'r') as file:
         sent_stories = file.read().splitlines()
@@ -59,8 +60,9 @@ def clean_stories_folder():
 
 
 async def download_stories():
+    random_username = [Credentials.INSTAGRAM_USERNAME, Credentials.INSTAGRAM_USERNAME1][random.randint(1,2)]
     command = ['python3', 'InstaStoryLoader/StoryLoader.py', '-u',
-               Credentials.INSTAGRAM_USERNAME, '-p', Credentials.INSTAGRAM_PASSWORD, '-d',
+               random_username, '-p', Credentials.INSTAGRAM_PASSWORD, '-d',
                Credentials.STORIES_PROVIDER_USERNAME, '--no-thumbs', '--taken-at']
     subprocess.run(command)
 
@@ -96,8 +98,8 @@ async def remove_credentials_periodically():
             print('[I] Credentials file removed.')
         else:
             print('[I] No credentials file found to remove.')
-
-        await asyncio.sleep(14400)
+        sleep_time = random.randint(13000, 15800)
+        await asyncio.sleep(sleep_time)
 
 
 async def periodic_task(context):
@@ -109,8 +111,9 @@ async def periodic_task(context):
         if datetime.now() - last_cleanup >= timedelta(days=2):
             clean_stories_folder()
             last_cleanup = datetime.now()
+        sleep_time = random.randint(3000, 4200)
+        await asyncio.sleep(sleep_time)
 
-        await asyncio.sleep(1800)
 
 
 async def main():
